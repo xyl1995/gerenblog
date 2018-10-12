@@ -1,0 +1,17 @@
+#wrap{
+    width:70%;
+    margin:100px auto;
+    background: #fff;
+}
+h1{
+    height:50px;
+    font-size:30px;
+    text-align:center;
+    line-height:50px;
+    font-weight: bold;
+}
+p{
+    text-indent: 2em;
+    font-size:14px;
+    line-height:25px;
+}

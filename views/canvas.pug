@@ -1,0 +1,81 @@
+extends ./layout/layout
+
+block css
+  link(rel="stylesheet", href="/css/canvas.css")
+  canvas
+block scripts
+  script.
+    let oC = document.querySelector('canvas');
+        let cxt = oC.getContext('2d');
+        let w = oC.width = window.innerWidth;
+        let h = oC.height = window.innerHeight;
+
+        window.addEventListener('resize',function () {
+            w = oC.width = window.innerWidth;
+            h = oC.height = window.innerHeight;
+        })
+
+        let color = cxt.createLinearGradient(w/2,h/2-100,w/2,h/2+100);
+        color.addColorStop(0,'#00f');
+        color.addColorStop(0.5,'#f00');
+        color.addColorStop(1,'#0f0');
+
+        document.addEventListener('dragover',function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        })
+        document.addEventListener('drop',createDrop);
+        // H5 拖拽播放音乐
+        function createDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let dataTransfer = e.dataTransfer;
+            let dataAudio = dataTransfer.files[0];
+
+            let blob = new Blob([dataAudio],{type:'audio/mpeg'});
+            let url = window.URL.createObjectURL(blob);
+
+            let elelemt = document.createElement('audio'); // 音乐的播放源
+            elelemt.src = url;
+            elelemt.autoplay = 'autoplay';
+            elelemt.play();
+            audioCanvas(elelemt);
+        }
+
+        // 绘制音频音符跳动
+        function audioCanvas(elelemt){
+            // 创建音频对象
+            let audioCxt = new AudioContext();
+
+            // 创建分析机
+            let analyser = audioCxt.createAnalyser();
+
+            // 创建 对象分析audio标签
+            let audioSrc = audioCxt.createMediaElementSource(elelemt);
+
+            // 把媒体源和分析机连接起来
+            audioSrc.connect(analyser);
+
+            // mp3  -> 分析器 -> 目的地（耳机）
+            audioSrc.connect(audioCxt.destination);
+
+            //绘制音频（根据频率数据 绘制矩形高度）
+            let conut = 200;
+            let data = new Uint8Array(analyser.frequencyBinCount); // 是频率数据 1024长度
+
+            (function draw() {
+                cxt.clearRect(0,0,w,h);
+                analyser.getByteFrequencyData(data);
+                let step = Math.round( data.length/conut ); //抽样 不需要1024条数据 间隔5个抽取一条数据 
+                //console.log( data )
+                for ( let i=0;i<conut;i++ ){
+                    let lineH = data[step*i];	//抽样 不需要1024条数据 间隔5个抽取一条数据 
+                    cxt.fillStyle = color;
+                    cxt.fillRect(w/2+i*4,h/2,2,-lineH);
+                    cxt.fillRect((w/2)-(i)*4,h/2,2,-lineH);
+                    cxt.fillRect(w/2+i*4,h/2,2,lineH);
+                    cxt.fillRect((w/2)-(i)*4,h/2,2,lineH);
+                }
+                requestAnimationFrame(draw)
+            })();
+        }

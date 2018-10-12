@@ -1,0 +1,14 @@
+*{
+    margin: 0;
+}
+body{
+    overflow: hidden;
+}
+canvas{
+    display: block;
+    background:#06AF8F linear-gradient(
+            135deg,
+            rgb(142, 132, 133) 0%,
+            rgb(230, 132, 110) 100%
+    );
+}
